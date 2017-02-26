@@ -2,6 +2,6 @@
 
 ### Raspberry Pi
 
-#### Rainbow Hat Peizo Buzzer
+#### Rainbow Hat Piezo Buzzer
 
 PWM example
