@@ -11,10 +11,13 @@ import com.google.android.things.pio.PeripheralManagerService;
 import com.google.android.things.pio.Pwm;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends Activity {
 
     private static final String BUZZER_PIN = "PWM1";
+    private static final List<Music.Note> SONG = new ArrayList<>();
 
     private Pwm bus;
     private Handler buzzerSongHandler;
@@ -22,6 +25,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         PeripheralManagerService service = new PeripheralManagerService();
         try {
             bus = service.openPwm(BUZZER_PIN);
@@ -43,19 +47,30 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        buzzerSongHandler.post(play);
+        SONG.addAll(Music.POKEMON_ANIME_THEME);
+        buzzerSongHandler.post(playSong);
     }
 
-    private final Runnable play = new Runnable() {
+    private final Runnable playSong = new Runnable() {
         @Override
         public void run() {
-            try {
-                bus.setPwmFrequencyHz(333);
-                bus.setEnabled(true);
-                SystemClock.sleep(250);
-                bus.setEnabled(false);
-            } catch (IOException e) {
-                throw new IllegalStateException(BUZZER_PIN + " bus cannot play note.", e);
+            if (SONG.isEmpty()) {
+                return;
+            }
+
+            Music.Note note = SONG.remove(0);
+
+            if (note.isRest()) {
+                SystemClock.sleep(note.getPeriod());
+            } else {
+                try {
+                    bus.setPwmFrequencyHz(note.getFrequency());
+                    bus.setEnabled(true);
+                    SystemClock.sleep(note.getPeriod());
+                    bus.setEnabled(false);
+                } catch (IOException e) {
+                    throw new IllegalStateException(BUZZER_PIN + " bus cannot play note.", e);
+                }
             }
             buzzerSongHandler.post(this);
         }
@@ -63,7 +78,7 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onStop() {
-        buzzerSongHandler.removeCallbacks(play);
+        buzzerSongHandler.removeCallbacks(playSong);
         super.onStop();
     }
 
