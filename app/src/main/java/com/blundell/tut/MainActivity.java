@@ -11,13 +11,13 @@ import com.google.android.things.pio.PeripheralManagerService;
 import com.google.android.things.pio.Pwm;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 public class MainActivity extends Activity {
 
     private static final String BUZZER_PIN = "PWM1";
-    private static final List<Music.Note> SONG = new ArrayList<>();
+    private static final Queue<Music.Note> SONG = new ArrayDeque<>();
 
     private Pwm bus;
     private Handler buzzerSongHandler;
@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
                 return;
             }
 
-            Music.Note note = SONG.remove(0);
+            Music.Note note = SONG.poll();
 
             if (note.isRest()) {
                 SystemClock.sleep(note.getPeriod());
