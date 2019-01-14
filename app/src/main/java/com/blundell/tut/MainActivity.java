@@ -16,7 +16,6 @@ import java.util.Queue;
 
 public class MainActivity extends Activity {
 
-    private static final String BUZZER_PIN = "PWM1";
     private static final Queue<Music.Note> SONG = new ArrayDeque<>();
 
     private Pwm bus;
@@ -28,15 +27,15 @@ public class MainActivity extends Activity {
 
         PeripheralManager service = PeripheralManager.getInstance();
         try {
-            bus = service.openPwm(BUZZER_PIN);
+            bus = service.openPwm(BoardConfig.getBuzzerPin());
         } catch (IOException e) {
-            throw new IllegalStateException(BUZZER_PIN + " bus cannot be opened.", e);
+            throw new IllegalStateException(BoardConfig.getBuzzerPin() + " bus cannot be opened.", e);
         }
 
         try {
             bus.setPwmDutyCycle(50);
         } catch (IOException e) {
-            throw new IllegalStateException(BUZZER_PIN + " bus cannot be configured.", e);
+            throw new IllegalStateException(BoardConfig.getBuzzerPin() + " bus cannot be configured.", e);
         }
 
         HandlerThread handlerThread = new HandlerThread("BackgroundThread");
@@ -69,7 +68,7 @@ public class MainActivity extends Activity {
                     SystemClock.sleep(note.getPeriod());
                     bus.setEnabled(false);
                 } catch (IOException e) {
-                    throw new IllegalStateException(BUZZER_PIN + " bus cannot play note.", e);
+                    throw new IllegalStateException(BoardConfig.getBuzzerPin() + " bus cannot play note.", e);
                 }
             }
             buzzerSongHandler.post(this);
@@ -87,7 +86,7 @@ public class MainActivity extends Activity {
         try {
             bus.close();
         } catch (IOException e) {
-            Log.e("TUT", BUZZER_PIN + " bus cannot be closed, you may experience errors on next launch.", e);
+            Log.e("TUT", BoardConfig.getBuzzerPin() + " bus cannot be closed, you may experience errors on next launch.", e);
         }
         super.onDestroy();
     }
